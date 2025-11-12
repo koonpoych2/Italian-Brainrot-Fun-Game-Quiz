@@ -6,16 +6,24 @@ import 'package:flutter/material.dart';
 class ResultScreen extends StatelessWidget {
   
   final String correctAnswer;
+  final String correctAnswerType;
   final int score;
+  final int maxScore;
   
+
   const ResultScreen({
     super.key,
     required this.correctAnswer,
-    required this.score
+    required this.score,
+    required this.correctAnswerType,
+    required this.maxScore
   });
 
   @override
   Widget build(BuildContext context) {
+
+    bool isclear = maxScore == score;
+
     return Scaffold(
       appBar: AppBar(
         // backgroundColor: Colors.white,
@@ -39,35 +47,61 @@ class ResultScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           const SizedBox(width: 1000),
-          const Text(
-            'Your Score : ',
-            style: TextStyle(
-              fontSize: 34,
-              fontWeight: FontWeight.w500
-            ),
-          ),
-          Stack( 
-            alignment: Alignment.center,
+          Column(
             children: [
-              SizedBox(
-                height: 250,
-                width: 250,
-                child: CircularProgressIndicator(
-                  strokeWidth: 10,
-                  value: score/9,
-                  color: Colors.green,
-                  backgroundColor: Colors.white,
+              Text(
+                isclear 
+                ? 'YOU WIN'
+                : 'YOU LOSE',
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w500
                 ),
               ),
-              Column(
-                children: [
-                  Text(
-                    score.toString(),
-                    style: const TextStyle(fontSize: 80),
-                  )
-                ],)
+              Text(
+                ' ${score.toString()}/${maxScore}',
+                style: const TextStyle(fontSize: 50),
+              ),
             ],
-          )
+          ),
+
+          Column(
+            children: [
+              Text(
+                'CORRECT ANSWER IS',
+                style: const TextStyle(fontSize: 30),
+              ),
+            const SizedBox(height: 20),
+            Stack( 
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  height: 250,
+                  width: 250,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 112, 236, 116), // สีพื้นหลัง
+                      borderRadius: BorderRadius.circular(12), // มุมโค้ง 12px (ปรับได้)
+                    ),
+                  ),
+                ),
+              ],
+            )
+            ],
+          ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FilledButton(
+                  child: const Text("HOME", style: TextStyle(fontSize: 25)),
+                  onPressed: () {},
+                          ),
+                FilledButton(
+                  child: const Text("RETRY", style: TextStyle(fontSize: 25)),
+                  onPressed: () {},
+                          ),
+              ],
+            )
         ],
       ),
     );

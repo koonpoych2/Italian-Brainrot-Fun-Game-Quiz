@@ -23,6 +23,20 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   int score = 0;
   int questionIndex = 0;
 
+  void neviResultPaeg(){
+        Navigator.pushReplacement(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => ResultScreen(
+            correctAnswer: questionList[questionIndex].question, 
+            score: score,
+            maxScore: questionList.length,
+            correctAnswerType: "",
+          )
+          )
+      );
+  }
+
   void pickAnswer(int value) {
     tempSelectAnswerIndex = value;
   }
@@ -34,18 +48,12 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
       score++;
       nextQuestion();
     } else {
-        Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => ResultScreen(
-            correctAnswer: questionList[questionIndex].question, 
-            score: score
-          )
-          )
-      );
+      neviResultPaeg();
     }
     setState(() {});
   }
+
+
 
   void nextQuestion() {
     _timerService.cancel();
@@ -57,15 +65,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
       _startCountDown();
     } else {
       // result page
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => ResultScreen(
-            correctAnswer: questionList[questionIndex].question, 
-            score: score
-          )
-          )
-      );
+      neviResultPaeg();
     }
   }
 

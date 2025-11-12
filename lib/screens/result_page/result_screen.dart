@@ -1,10 +1,11 @@
 import 'dart:ffi';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 
-class ResultScreen extends StatelessWidget {
-  
+class ResultScreen extends StatefulWidget {
+
   final String correctAnswer;
   final String correctAnswerType;
   final int score;
@@ -18,11 +19,31 @@ class ResultScreen extends StatelessWidget {
     required this.correctAnswerType,
     required this.maxScore
   });
+  @override
+  State<ResultScreen> createState() => _ResultScreenState();
+}
+
+class _ResultScreenState extends State<ResultScreen> {
+
+  late final AudioPlayer _player;
+
+  @override
+  void initState() {
+    super.initState();
+    _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+    // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
+  }
+
+  @override
+  void dispose() { 
+    _player.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    bool isclear = maxScore == score;
+    bool isclear = widget.maxScore == widget.score;
 
     return Scaffold(
       appBar: AppBar(
@@ -59,7 +80,7 @@ class ResultScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                ' ${score.toString()}/${maxScore}',
+                ' ${widget.score.toString()}/${widget.maxScore}',
                 style: const TextStyle(fontSize: 50),
               ),
             ],
@@ -85,6 +106,33 @@ class ResultScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                widget.correctAnswerType == "image"
+                ? 
+                SizedBox(
+                  height: 250,
+                  width: 250,
+                  child: 
+                    Image.asset("assets/${widget.correctAnswerType}")
+                )
+                : 
+                widget.correctAnswerType == "text"
+                ? Text("${widget.correctAnswer}", style: TextStyle(fontSize: 25))
+                :
+                GestureDetector(
+                    onTap: () async {
+                      await _player.stop();
+                      await _player.play(AssetSource(widget.correctAnswer));
+                    },
+                    child: Align(
+                        child:Icon(
+                          Icons.volume_up_rounded,
+                          color: Colors.black,
+                          size: 50
+                        )
+                      ),
+                  )
+                // Text("${widget.correctAnswer}", style: TextStyle(fontSize: 25))
               ],
             )
             ],

@@ -24,17 +24,29 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   int questionIndex = 0;
 
   void neviResultPaeg(){
-        Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(
-          builder: (context) => ResultScreen(
-            correctAnswer: questionList[questionIndex].question, 
-            score: score,
-            maxScore: questionList.length,
-            correctAnswerType: "",
-          )
-          )
-      );
+    
+    String answerType = "image";
+    String answerCurrent = questionList[questionIndex].options[questionList[questionIndex].correctAnswerIndex];
+    if ( questionList[questionIndex].questionType.contains('-text') ) {
+      answerType = "text";
+    }
+    else if ( questionList[questionIndex].questionType.contains('-sound') ) {
+      answerType = "sound";
+    }
+
+
+    Navigator.pushReplacement(
+    context, 
+    MaterialPageRoute(
+      builder: (context) => ResultScreen(
+        correctAnswer: answerCurrent, 
+        score: score,
+        maxScore: questionList.length,
+        correctAnswerType: answerType,
+      )
+      )
+  );
+
   }
 
   void pickAnswer(int value) {

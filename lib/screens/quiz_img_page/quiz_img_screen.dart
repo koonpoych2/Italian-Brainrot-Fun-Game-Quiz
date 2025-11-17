@@ -17,20 +17,36 @@ class QuizImgScreen extends StatefulWidget {
 }
 
 class _QuizImgScreenState extends State<QuizImgScreen> {
+  late final List<Question> _questionList;
   late final AudioPlayer _player;
   int? tempSelectAnswerIndex = null;
   int? selectAnswerIndex = null;
   int score = 0;
   int questionIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
+    _questionList = buildImgQuestions(optionsPerQuestion:4);
+    _startCountDown(); // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
+  }
+
+  @override
+  void dispose() {
+    _timerService.cancel(); // ล้าง timer เมื่อออกหน้า
+    _player.dispose();
+    super.dispose();
+  }
+  
   void neviResultPaeg(){
     
     String answerType = "image";
-    String answerCurrent = questionList[questionIndex].options[questionList[questionIndex].correctAnswerIndex];
-    if ( questionList[questionIndex].questionType.contains('-text') ) {
+    String answerCurrent = _questionList[questionIndex].options[_questionList[questionIndex].correctAnswerIndex];
+    if ( _questionList[questionIndex].questionType.contains('-text') ) {
       answerType = "text";
     }
-    else if ( questionList[questionIndex].questionType.contains('-sound') ) {
+    else if ( _questionList[questionIndex].questionType.contains('-sound') ) {
       answerType = "sound";
     }
 
@@ -41,7 +57,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
       builder: (context) => ResultScreen(
         correctAnswer: answerCurrent, 
         score: score,
-        maxScore: questionList.length,
+        maxScore: _questionList.length,
         correctAnswerType: answerType,
       )
       )
@@ -55,7 +71,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
 
   void submitAnswer() {
     selectAnswerIndex = tempSelectAnswerIndex;
-    final correctIndex = questionList[questionIndex].correctAnswerIndex;
+    final correctIndex = _questionList[questionIndex].correctAnswerIndex;
     if (selectAnswerIndex == correctIndex) {
       score++;
       nextQuestion();
@@ -70,7 +86,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   void nextQuestion() {
     _timerService.cancel();
     tempSelectAnswerIndex = null;
-    if (questionIndex < questionList.length - 1) {
+    if (questionIndex < _questionList.length - 1) {
       questionIndex++;
       selectAnswerIndex = null;
 
@@ -104,28 +120,20 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
         setState(() {
           _isRunning = false;
         });
+
+        if ( selectAnswerIndex == null) {
+          neviResultPaeg();
+        }
         nextQuestion();
       },
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
-    _startCountDown(); // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
-  }
 
-  @override
-  void dispose() {
-    _timerService.cancel(); // ล้าง timer เมื่อออกหน้า
-    _player.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    final question = questionList[questionIndex];
+    final question = _questionList[questionIndex];
     return Scaffold(
       appBar: AppBar(
         leading: null,
@@ -138,7 +146,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
               child: Text(
-                "${questionIndex + 1}/${questionList.length}",
+                "${questionIndex + 1}/${_questionList.length}",
                 style: const TextStyle(fontSize: 16),
               ),
             ),

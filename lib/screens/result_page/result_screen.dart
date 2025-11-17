@@ -146,7 +146,14 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                 FilledButton(
                   child: const Text("RETRY", style: TextStyle(fontSize: 25)),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context, 
+                      MaterialPageRoute(
+                        builder: (_) => QuizImgScreen()
+                        )
+                    );
+                  },
                           ),
               ],
             )

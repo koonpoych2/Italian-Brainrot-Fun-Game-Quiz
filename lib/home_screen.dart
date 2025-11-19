@@ -1,3 +1,4 @@
+import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_card.dart';
 import 'test_screen.dart';
@@ -18,6 +19,7 @@ class HomeScreen extends StatelessWidget {
         ),
         elevation: 0,
       ),
+      
       body: Column(
         children: [
           Expanded(
@@ -29,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                     title: "QUIZ",
                     backgroundColor: Color(0xFF8B6FD8),
                     // imagePath: 'assets/mammoth.png', // Replace with your image
-                    destination: PlaceholderScreen(title: "Quiz"), // Your destination screen
+                    destination: QuizImgScreen(), // Your destination screen
                     icon: Icons.lightbulb_outline,
                   ),
                   SizedBox(height: 50),

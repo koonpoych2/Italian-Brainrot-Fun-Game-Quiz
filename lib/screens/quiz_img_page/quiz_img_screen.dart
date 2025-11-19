@@ -28,7 +28,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   void initState() {
     super.initState();
     _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
-    _questionList = buildImgQuestions(optionsPerQuestion:4);
+    _questionList = buildImgQuestions(optionsPerQuestion: 4);
     _startCountDown(); // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
   }
 
@@ -38,31 +38,28 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
     _player.dispose();
     super.dispose();
   }
-  
-  void neviResultPaeg(){
-    
+
+  void neviResultPaeg() {
     String answerType = "image";
-    String answerCurrent = _questionList[questionIndex].options[_questionList[questionIndex].correctAnswerIndex];
-    if ( _questionList[questionIndex].questionType.contains('-text') ) {
+    String answerCurrent = _questionList[questionIndex]
+        .options[_questionList[questionIndex].correctAnswerIndex];
+    if (_questionList[questionIndex].questionType.contains('-text')) {
       answerType = "text";
-    }
-    else if ( _questionList[questionIndex].questionType.contains('-sound') ) {
+    } else if (_questionList[questionIndex].questionType.contains('-sound')) {
       answerType = "sound";
     }
 
-
     Navigator.pushReplacement(
-    context, 
-    MaterialPageRoute(
-      builder: (context) => ResultScreen(
-        correctAnswer: answerCurrent, 
-        score: score,
-        maxScore: _questionList.length,
-        correctAnswerType: answerType,
-      )
-      )
-  );
-
+      context,
+      MaterialPageRoute(
+        builder: (context) => ResultScreen(
+          correctAnswer: answerCurrent,
+          score: score,
+          maxScore: _questionList.length,
+          correctAnswerType: answerType,
+        ),
+      ),
+    );
   }
 
   void pickAnswer(int value) {
@@ -80,8 +77,6 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
     }
     setState(() {});
   }
-
-
 
   void nextQuestion() {
     _timerService.cancel();
@@ -121,7 +116,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
           _isRunning = false;
         });
 
-        if ( selectAnswerIndex == null) {
+        if (selectAnswerIndex == null) {
           neviResultPaeg();
         }
         nextQuestion();
@@ -129,86 +124,228 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final question = _questionList[questionIndex];
     return Scaffold(
+      backgroundColor: const Color(0xFFFFA867),
+
       appBar: AppBar(
-        leading: null,
-        title: Text(
-              "${_seconds.toString()} sec",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-            ),
+        backgroundColor: const Color(0xFF2B2B2B),
+
+        title: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.black, width: 3),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "${_seconds.toString()}",
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Text(
+                "s",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
           Center(
             child: Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: Text(
-                "${questionIndex + 1}/${_questionList.length}",
-                style: const TextStyle(fontSize: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.black, width: 3),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          "${questionIndex + 1}",
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          "/${_questionList.length}",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
+        elevation: 0,
       ),
+
       body: Padding(
-        padding: const EdgeInsets.all(kDefaultPaddin),
+        padding: const EdgeInsets.only(top: kDefaultPaddin),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             Expanded(
-                child: 
+              flex: 5,
+              child:
                   ["sound-text", "sound-image"].contains(question.questionType)
                   ? GestureDetector(
-                    onTap: () async {
-                      await _player.stop();
-                      await _player.play(AssetSource(question.question));
-                    },
-                    child: Align(
-                        child:Icon(
-                          Icons.volume_up_rounded,
-                          color: Colors.black,
-                          size: 50
-                        )
+                      onTap: () async {
+                        await _player.stop();
+                        await _player.play(AssetSource(question.question));
+                      },
+                      child: Align(
+                        child: Stack(
+                          alignment : Alignment.center,
+                          children: [
+                            Image.asset("assets/images/sound_disk.png"),
+                            CircleAvatar(
+                              radius: 40,
+                              backgroundColor: Colors.white,
+                              child: Icon(
+                                Icons.volume_up_rounded,
+                                color: Colors.black,
+                                size: 50,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                  )
-                  : Image.asset("assets/${question.question}")
-              ),
-            GridView.builder(
-              shrinkWrap: true,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-              ), // ขยายตามเนื้อหา
-              itemCount: question.options.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () async {
-                    pickAnswer(index);
-                    if ( ["image-sound"].contains(question.questionType) ) {
-                      await _player.stop();
-                      await _player.play(AssetSource(question.options[index]));
-                    }
-                  },
-                  child: Answercard(
-                    questionOption: question.options[index],
-                    questionOptionType: question.questionType,
-                    isSelected: selectAnswerIndex != null,
-                    currentAnswerIndex: index,
-                    selectAnswerIndex: tempSelectAnswerIndex,
-                    correctAnswerIndex: question.correctAnswerIndex,
-                  ),
-                );
-              },
+                    )
+                  : Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Image.asset("assets/${question.question}"),
+                    ),
             ),
-            FilledButton(
-              onPressed: () {
-                submitAnswer();
-              },
-              child: const Text("Submit", style: TextStyle(fontSize: 25)),
+
+            Expanded(
+              flex: 5,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        const crossAxisCount = 2;
+                        const crossSpacing = 10.0;
+                        const mainSpacing = 10.0;
+
+                        // จำนวนแถวตามจำนวนตัวเลือก
+                        final rows = (question.options.length / crossAxisCount)
+                            .ceil();
+
+                        // คำนวณขนาดช่องให้พอดีกับพื้นที่
+                        final itemWidth =
+                            (constraints.maxWidth -
+                                (crossAxisCount - 1) * crossSpacing) /
+                            crossAxisCount;
+                        final itemHeight =
+                            (constraints.maxHeight - (rows - 1) * mainSpacing) /
+                            rows;
+
+                        final childAspectRatio = itemWidth / itemHeight;
+
+                        return GridView.builder(
+                          physics:
+                              const NeverScrollableScrollPhysics(), // ❗ ไม่ให้ scroll
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: crossSpacing,
+                                mainAxisSpacing: mainSpacing,
+                                childAspectRatio: childAspectRatio,
+                              ),
+                          itemCount: question.options.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () async {
+                                pickAnswer(index);
+                                if ([
+                                  "image-sound",
+                                ].contains(question.questionType)) {
+                                  await _player.stop();
+                                  await _player.play(
+                                    AssetSource(question.options[index]),
+                                  );
+                                }
+                              },
+                              child: Answercard(
+                                questionOption: question.options[index],
+                                questionOptionType: question.questionType,
+                                isSelected: selectAnswerIndex != null,
+                                currentAnswerIndex: index,
+                                selectAnswerIndex: tempSelectAnswerIndex,
+                                correctAnswerIndex: question.correctAnswerIndex,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: SizedBox(
+                      width: double.infinity, 
+                      child: FilledButton(
+                        onPressed: () {
+                          submitAnswer();
+                        },
+                        child: const Text("OK", style: TextStyle(fontSize: 25)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              color: const Color(0xFF2B2B2B),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: const Center(
+                child: Text(
+                  'ADS',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

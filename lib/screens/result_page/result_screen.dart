@@ -46,24 +46,6 @@ class _ResultScreenState extends State<ResultScreen> {
     bool isclear = widget.maxScore == widget.score;
 
     return Scaffold(
-      appBar: AppBar(
-        // backgroundColor: Colors.white,
-        leading: IconButton(
-          onPressed: () => {
-        Navigator.pushReplacement(
-            context, 
-            MaterialPageRoute(
-              builder: (_) => QuizImgScreen()
-              )
-          )
-          }, 
-          icon: SvgPicture.asset(
-            "assets/icons/back.svg", 
-            colorFilter: ColorFilter.mode(Colors.black, BlendMode.srcIn),
-          )
-        ),
-
-      ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [

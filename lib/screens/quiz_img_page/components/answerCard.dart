@@ -26,20 +26,18 @@ class Answercard extends StatelessWidget {
     bool isSelectThisAnswer = currentAnswerIndex == selectAnswerIndex;
     
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
-        height: 70,
-        padding: const EdgeInsets.all(kDefaultPaddin),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isSelectThisAnswer ? Colors.lightGreenAccent : Colors.black,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected
-              ? isCorrectAnswer 
-                ? Colors.green
-                : Colors.red
-              : Colors.black
-                )
+            color: isSelectThisAnswer
+              ?  Colors.green
+              : Colors.black,
+              width: 5,
+            )
           ),
           child: Stack(
             children: [
@@ -48,7 +46,7 @@ class Answercard extends StatelessWidget {
                   Align(
                     child:Icon(
                       Icons.volume_up_rounded,
-                      color: Colors.white,
+                      color: Colors.black,
                       size: 50
                     )
                   )
@@ -62,7 +60,7 @@ class Answercard extends StatelessWidget {
                         questionOption!,
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Colors.white
+                          color: Colors.black
                         ),
                       )
                   ),

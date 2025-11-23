@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:brainrot_quiz/components/text_show.dart';
 import 'package:brainrot_quiz/constants.dart';
 import 'package:brainrot_quiz/models/quize.dart';
 import 'package:brainrot_quiz/models/quize_img_data.dart';
@@ -326,7 +327,12 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
                         onPressed: () {
                           submitAnswer();
                         },
-                        child: const Text("OK", style: TextStyle(fontSize: 25)),
+                        child: TextShow(
+                          title: 'OK',
+                          backgroundColor: Colors.black,
+                          mainTextSize: 20,
+                          mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                        ),
                       ),
                     ),
                   ),

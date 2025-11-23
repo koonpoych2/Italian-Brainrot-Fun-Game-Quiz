@@ -1,3 +1,4 @@
+import 'package:brainrot_quiz/components/text_show.dart';
 import 'package:brainrot_quiz/constants.dart';
 import 'package:flutter/material.dart';
 
@@ -20,11 +21,19 @@ class Answercard extends StatelessWidget {
   final int correctAnswerIndex;
 
 
+
   @override
   Widget build(BuildContext context) {
     bool isCorrectAnswer = correctAnswerIndex == currentAnswerIndex;
     bool isSelectThisAnswer = currentAnswerIndex == selectAnswerIndex;
     
+    final Map<int, Color> colorMap = {
+      0: const Color.fromARGB(255, 115, 83, 242),
+      1: const Color.fromARGB(255, 25, 167, 77),
+      2: const Color.fromARGB(233, 243, 145, 32),
+      3: const Color.fromARGB(255, 80, 154, 250),
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
@@ -44,10 +53,14 @@ class Answercard extends StatelessWidget {
                   ["image-sound"].contains(questionOptionType)
                   ? 
                   Align(
-                    child:Icon(
-                      Icons.volume_up_rounded,
-                      color: Colors.black,
-                      size: 50
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: colorMap[currentAnswerIndex],
+                      child: Icon(
+                        Icons.volume_up_rounded,
+                        color: Colors.black,
+                        size: 50
+                      ),
                     )
                   )
                   : ["sound-image"].contains(questionOptionType)
@@ -56,13 +69,12 @@ class Answercard extends StatelessWidget {
                   )
                   : Align(
                     child: 
-                      Text(
-                        questionOption!,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black
-                        ),
-                      )
+                    TextShow(
+                      title: questionOption!,
+                      backgroundColor: colorMap[currentAnswerIndex]!,
+                      mainTextSize: 20,
+                      mainbackgroundColor: Colors.black,
+                    )
                   ),
                 const SizedBox(height: 10,),
                 if (isSelected) 

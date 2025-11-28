@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'widgets/outlined_title_text.dart';
 
 class MenuCard extends StatelessWidget {
   final String title;
@@ -91,34 +92,7 @@ class MenuCard extends StatelessWidget {
           Positioned(
             left: -5,
             top: 0, // Positioned at the top, above the card
-            child: Stack(
-              children: [
-                // Outline/stroke layer
-                Text(
-                  title,
-                  style: GoogleFonts.luckiestGuy(
-                    fontSize: 54,
-                    fontWeight: FontWeight.w900,
-                    height: 1.1,
-                    foreground: Paint()
-                      ..style = PaintingStyle.stroke
-                      ..strokeWidth = 10
-                      ..color = Colors.white,
-                      // ..color = Colors.black.withOpacity(0.3),
-                  ),
-                ),
-                // Fill layer
-                Text(
-                  title,
-                  style: GoogleFonts.luckiestGuy(
-                    fontSize: 54,
-                    fontWeight: FontWeight.w900,
-                    color: Color(0xFFE76F51),
-                    height: 1.1,
-                  ),
-                ),
-              ],
-            ),
+            child: OutlinedTitleText(text: title),
           ),
         ],
       ),

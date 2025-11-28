@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_card.dart';
 import 'test_screen.dart';
+import 'sound_board_screen.dart';
+import 'wiki_list_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -37,7 +39,7 @@ class HomeScreen extends StatelessWidget {
                     title: "SOUND\nBOARD",
                     backgroundColor: Color(0xFF3FA89A),
                     // imagePath: 'assets/robot.png', // Replace with your image
-                    destination: PlaceholderScreen(title: "SOUND BOARD"),
+                    destination: SoundBoardScreen(),
                     icon: null,
                   ),
                   SizedBox(height: 50),
@@ -45,7 +47,7 @@ class HomeScreen extends StatelessWidget {
                     title: "WIKI",
                     backgroundColor: Color(0xFFE9C46A),
                     // imagePath: 'assets/monkey.png', // Replace with your image
-                    destination: PlaceholderScreen(title: "WIKI"),
+                    destination: WikiListScreen(),
                     icon: Icons.language,
                   ),
                 ],

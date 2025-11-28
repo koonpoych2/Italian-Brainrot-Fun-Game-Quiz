@@ -1,3 +1,5 @@
+import 'package:brainrot_quiz/constants.dart';
+import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 
@@ -12,7 +14,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Quiz',
       theme: ThemeData(
         // This is the theme of your application.
         //

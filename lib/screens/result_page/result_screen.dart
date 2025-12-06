@@ -1,11 +1,11 @@
-import 'dart:ffi';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:brainrot_quiz/components/text_show.dart';
 import 'package:brainrot_quiz/home_screen.dart';
+import 'package:brainrot_quiz/providers/app_state_provider.dart';
 import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 class ResultScreen extends StatefulWidget {
   final String correctAnswer;
@@ -20,18 +20,38 @@ class ResultScreen extends StatefulWidget {
     required this.correctAnswerType,
     required this.maxScore,
   });
+
   @override
   State<ResultScreen> createState() => _ResultScreenState();
 }
 
 class _ResultScreenState extends State<ResultScreen> {
   late final AudioPlayer _player;
+  bool _isNewHighScore = false;
 
   @override
   void initState() {
     super.initState();
     _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
-    // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
+
+    // Save score and earn coins after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _saveResults();
+    });
+  }
+
+  Future<void> _saveResults() async {
+    final appState = context.read<AppStateProvider>();
+
+    // Check if this is a new high score
+    _isNewHighScore = widget.score > appState.highScore;
+
+    // Save results to persistent storage
+    await appState.onQuizComplete(widget.score, widget.maxScore);
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
@@ -43,6 +63,7 @@ class _ResultScreenState extends State<ResultScreen> {
   @override
   Widget build(BuildContext context) {
     bool isclear = widget.maxScore == widget.score;
+    final appState = context.watch<AppStateProvider>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFA867),
@@ -51,29 +72,69 @@ class _ResultScreenState extends State<ResultScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             const SizedBox(width: 1000),
+
+            // Result Title and Score
             Column(
               children: [
                 Stack(
                   children: [
-                    // Outline/stroke layer
                     TextShow(
                       title: isclear ? 'YOU WIN' : 'YOU LOSE',
                       backgroundColor: Colors.white,
                       mainTextSize: 54,
-                      mainbackgroundColor: Color(0xFFE76F51),
+                      mainbackgroundColor: const Color(0xFFE76F51),
                     ),
                   ],
                 ),
-
+                const SizedBox(height: 10),
                 TextShow(
-                  title: '${widget.score.toString()}/${widget.maxScore}',
+                  title: '${widget.score}/${widget.maxScore}',
                   backgroundColor: Colors.black,
                   mainTextSize: 50,
-                  mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                  mainbackgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                ),
+                const SizedBox(height: 15),
+
+                // High Score Container
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 15,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.black, width: 3),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isNewHighScore ? Icons.star : Icons.emoji_events,
+                        color: _isNewHighScore
+                            ? Colors.amber
+                            : Colors.grey[700],
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        _isNewHighScore
+                            ? 'New High Score!'
+                            : 'High Score: ${appState.highScore}',
+                        style: GoogleFonts.luckiestGuy(
+                          fontSize: _isNewHighScore ? 20 : 18,
+                          color: _isNewHighScore
+                              ? Colors.amber[700]
+                              : Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
 
+            // Correct Answer Section
             Column(
               children: [
                 Text(
@@ -85,7 +146,6 @@ class _ResultScreenState extends State<ResultScreen> {
                     height: 1.1,
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 Stack(
                   alignment: Alignment.center,
@@ -95,39 +155,36 @@ class _ResultScreenState extends State<ResultScreen> {
                       width: 250,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(
-                            255,
-                            112,
-                            236,
-                            116,
-                          ), // สีพื้นหลัง
-                          borderRadius: BorderRadius.circular(
-                            12,
-                          ), // มุมโค้ง 12px (ปรับได้)
+                          color: const Color.fromARGB(255, 112, 236, 116),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
-
                     widget.correctAnswerType == "image"
                         ? SizedBox(
                             height: 250,
                             width: 250,
                             child: Image.asset(
-                              "assets/${widget.correctAnswerType}",
+                              "assets/${widget.correctAnswer}",
                             ),
                           )
                         : widget.correctAnswerType == "text"
                         ? SizedBox(
-                          width: 250,
-                          child: Center(
-                            child: TextShow(
-                                title: '${widget.correctAnswer}',
+                            width: 250,
+                            child: Center(
+                              child: TextShow(
+                                title: widget.correctAnswer,
                                 backgroundColor: Colors.black,
                                 mainTextSize: 30,
-                                mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                                mainbackgroundColor: const Color.fromARGB(
+                                  255,
+                                  255,
+                                  255,
+                                  255,
+                                ),
                               ),
-                          ),
-                        )
+                            ),
+                          )
                         : GestureDetector(
                             onTap: () async {
                               await _player.stop();
@@ -135,85 +192,44 @@ class _ResultScreenState extends State<ResultScreen> {
                                 AssetSource(widget.correctAnswer),
                               );
                             },
-                            child: CircleAvatar(
+                            child: const CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.white,
-                              child: Align(
-                                child: Icon(
-                                  Icons.volume_up_rounded,
-                                  color: Colors.black,
-                                  size: 50,
-                                ),
+                              child: Icon(
+                                Icons.volume_up_rounded,
+                                color: Colors.black,
+                                size: 50,
                               ),
                             ),
                           ),
-                    // Text("${widget.correctAnswer}", style: TextStyle(fontSize: 25))
                   ],
                 ),
               ],
             ),
 
+            // Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    side: const BorderSide(color: Colors.black, width: 3),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                  ),
-                  child: Text(
-                    'HOME',
-                    style: GoogleFonts.luckiestGuy(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w200,
-                      color: Colors.black,
-                      height: 1.1,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => HomeScreen()),
-                    );
-                  },
-                ),
-                FilledButton(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    side: const BorderSide(color: Colors.black, width: 3),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 30,
-                      vertical: 15,
-                    ),
-                  ),
-                  child: Text(
-                    'RETRY',
-                    style: GoogleFonts.luckiestGuy(
-                      fontSize: 25,
-                      fontWeight: FontWeight.w200,
-                      color: Colors.black,
-                      height: 1.1,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => QuizImgScreen()),
-                    );
-                  },
-                ),
+                _buildButton('HOME', () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  );
+                }),
+                _buildButton('RETRY', () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const QuizImgScreen()),
+                  );
+                }),
               ],
             ),
           ],
         ),
       ),
 
+      // Bottom Ad Banner
       bottomNavigationBar: Container(
         color: const Color(0xFF2B2B2B),
         padding: EdgeInsets.only(
@@ -228,6 +244,27 @@ class _ResultScreenState extends State<ResultScreen> {
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton(String text, VoidCallback onPressed) {
+    return FilledButton(
+      style: FilledButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        side: const BorderSide(color: Colors.black, width: 3),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+      ),
+      onPressed: onPressed,
+      child: Text(
+        text,
+        style: GoogleFonts.luckiestGuy(
+          fontSize: 25,
+          fontWeight: FontWeight.w200,
+          color: Colors.black,
+          height: 1.1,
         ),
       ),
     );

@@ -1,10 +1,9 @@
 import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter/material.dart';
 import 'home_card.dart';
-import 'test_screen.dart';
 import 'sound_board_screen.dart';
 import 'wiki_list_screen.dart';
-
+import 'screens/debug_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -15,13 +14,23 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFA867),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2B2B2B),
-        title: const Text(
-          'Home',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Home', style: TextStyle(color: Colors.white)),
         elevation: 0,
+        actions: [
+          // Debug Button
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const DebugScreen()),
+              );
+            },
+            tooltip: 'Debug & Testing',
+          ),
+        ],
       ),
-      
+
       body: Column(
         children: [
           Expanded(

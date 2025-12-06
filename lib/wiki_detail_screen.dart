@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../models/wiki_item.dart';
+import '../models/options.dart';
 import '../widgets/ads_banner.dart';
 import '../widgets/custom_header.dart';
 
 class WikiDetailScreen extends StatelessWidget {
-  final WikiItem item;
+  final Options item;
 
   const WikiDetailScreen({super.key, required this.item});
 
@@ -17,7 +17,7 @@ class WikiDetailScreen extends StatelessWidget {
           children: [
             // Header
             CustomHeader(
-              title: item.title,
+              title: item.name,
               onHomeTap: () => Navigator.pop(context),
             ),
 
@@ -45,9 +45,9 @@ class WikiDetailScreen extends StatelessWidget {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(25),
                         child: Hero(
-                          tag: item.title, // Links animation to previous screen
+                          tag: item.name, // Links animation to previous screen
                           child: Image.asset(
-                            item.imagePath,
+                            item.imgPath,
                             width: double.infinity,
                             height: 250,
                             fit: BoxFit.cover,

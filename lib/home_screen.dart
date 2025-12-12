@@ -5,6 +5,7 @@ import 'home_card.dart';
 import 'sound_board_screen.dart';
 import 'wiki_list_screen.dart';
 import 'screens/debug_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 

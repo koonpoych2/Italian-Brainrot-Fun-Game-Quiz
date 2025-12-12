@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state_provider.dart';
 import 'widgets/outlined_title_text.dart';
+import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
 
 final images = ['assets/images/burbaloni_lulliloli.png'];
 
@@ -19,58 +20,131 @@ class SoundBoardScreen extends StatefulWidget {
 class _SoundBoardScreenState extends State<SoundBoardScreen> {
   final AudioPlayer _player = AudioPlayer();
   static const int _totalSounds = 20;
-
+  final RewardedAdManager _adManager = RewardedAdManager();
+  bool _isAdReady = false;
+  VoidCallback? _onAdReadyCallback;
+  
   Future<void> _playSound(String path) async {
     await _player.stop();
     await _player.play(AssetSource(path));
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
+
+void _loadAd() {
+    _adManager.loadRewardedAd(
+      onAdLoaded: () {
+        setState(() {
+          _isAdReady = true;
+        });
+        // เรียก callback ถ้ามี (กรณี dialog เปิดอยู่)
+        _onAdReadyCallback?.call();
+      },
+    );
+  }
   void _showUnlockDialog(BuildContext context, int index) {
     final appState = context.read<AppStateProvider>();
-
+    
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Unlock Sound', style: GoogleFonts.luckiestGuy()),
-        content: const Text(
-          'Watch a video ad to unlock this sound?\n\n(Video ads will be added by your friend)',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // TODO: Your friend will add video ad here
-              // After watching ad, unlock the sound
-              final success = await appState.unlockSound(index);
-              Navigator.pop(ctx);
-
-              if (success) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Sound unlocked! (Video ad will play here)',
-                      ),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (BuildContext dialogContext, StateSetter setDialogState) {
+            // ตั้ง callback ให้อัพเดท dialog state
+            _onAdReadyCallback = () {
+              if (dialogContext.mounted) {
+                setDialogState(() {
+                  // trigger rebuild
+                });
               }
-            },
-            child: const Text('Watch Ad & Unlock'),
-          ),
-        ],
-      ),
-    );
+            };
+
+            return AlertDialog(
+              title: Text('Unlock Sound', style: GoogleFonts.luckiestGuy()),
+              content: const Text(
+                'Watch a video ad to unlock this sound?\n\n(Video ads will be added by your friend)',
+                style: TextStyle(fontSize: 16),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _onAdReadyCallback = null; // clear callback
+                    Navigator.pop(ctx);
+                  },
+                  child: const Text('Cancel'),
+                ),
+                if (_isAdReady)
+                  ElevatedButton(
+                    onPressed: () {
+                      _onAdReadyCallback = null; // clear callback
+
+                    _adManager.showRewardedAd(
+                      context: context,
+                      onRewarded: () async {
+                        final success = await appState.unlockSound(index);
+                        Navigator.pop(ctx);
+
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Sound unlocked! (Video ad will play here)'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                        
+
+                      },
+                      onAdClosed: () {
+                        setState(() {
+                          _isAdReady = false;
+                        });
+                        _loadAd();
+                      },
+                    );
+
+
+                    },
+                    child: const Text('Watch Ad & Unlock'),
+                  )
+                else
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'กำลังโหลดโฆษณา...',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((_) {
+      // เมื่อปิด dialog แล้ว clear callback
+      _onAdReadyCallback = null;
+    });
   }
 
   @override
   void dispose() {
     _player.dispose();
+    _onAdReadyCallback = null;
     super.dispose();
   }
 

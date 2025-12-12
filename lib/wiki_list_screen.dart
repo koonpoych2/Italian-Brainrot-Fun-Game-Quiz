@@ -1,3 +1,4 @@
+import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -6,50 +7,123 @@ import 'data/app_data.dart';
 import 'widgets/ads_banner.dart';
 import 'widgets/custom_header.dart';
 import 'wiki_detail_screen.dart';
-
-class WikiListScreen extends StatelessWidget {
+class WikiListScreen extends StatefulWidget {
   const WikiListScreen({super.key});
+
+  @override
+  State<WikiListScreen> createState() => _WikiListScreenState();
+}
+
+class _WikiListScreenState extends State<WikiListScreen> {
+
+  final RewardedAdManager _adManager = RewardedAdManager();
+  bool _isAdReady = false;
+  VoidCallback? _onAdReadyCallback;
+
+void _loadAd() {
+    _adManager.loadRewardedAd(
+      onAdLoaded: () {
+        setState(() {
+          _isAdReady = true;
+        });
+        // เรียก callback ถ้ามี (กรณี dialog เปิดอยู่)
+        _onAdReadyCallback?.call();
+      },
+    );
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    _loadAd();
+  }
 
   void _showUnlockDialog(BuildContext context, int index) {
     final appState = context.read<AppStateProvider>();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Unlock Wiki Item', style: GoogleFonts.luckiestGuy()),
-        content: const Text(
-          'Watch a video ad to unlock this wiki item?\n\n(Video ads will be added by your friend)',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              // TODO: Your friend will add video ad here
-              // After watching ad, unlock the wiki item
-              final success = await appState.unlockWiki(index);
-              Navigator.pop(ctx);
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (BuildContext dialogContext, StateSetter setDialogState) {
+          
+          _onAdReadyCallback = () {
+            if (dialogContext.mounted) {
+              setDialogState(() {
+                // trigger rebuild
+              });
+            }
+          };
 
-              if (success) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Wiki item unlocked! (Video ad will play here)',
-                      ),
-                      backgroundColor: Colors.green,
+          return AlertDialog(
+            title: Text('Unlock Wiki Item', style: GoogleFonts.luckiestGuy()),
+            content: const Text(
+              'Watch a video ad to unlock this wiki item?\n\n(Video ads will be added by your friend)',
+              style: TextStyle(fontSize: 16),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Cancel'),
+              ),
+              if (_isAdReady)
+                ElevatedButton(
+                  onPressed: () {
+                    // TODO: Your friend will add video ad here
+                    // After watching ad, unlock the wiki item
+                      _onAdReadyCallback = null; // clear callback
+
+                    _adManager.showRewardedAd(
+                      context: context,
+                      onRewarded: () async {
+                        final success = await appState.unlockWiki(index);
+                        Navigator.pop(ctx);
+
+                        if (success && context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Wiki item unlocked! (Video ad will play here)'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        }
+                        
+
+                      },
+                      onAdClosed: () {
+                        setState(() {
+                          _isAdReady = false;
+                        });
+                        _loadAd();
+                      },
+                    );
+                  },
+                  child: const Text('Watch Ad & Unlock'),
+                )
+                else
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'loading ads...',
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
                     ),
-                  );
-                }
-              }
-            },
-            child: const Text('Watch Ad & Unlock'),
-          ),
-        ],
-      ),
+                  ),
+            ],
+          );
+          }
+        );
+      }
     );
   }
 

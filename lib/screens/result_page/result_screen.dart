@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:brainrot_quiz/components/text_show.dart';
 import 'package:brainrot_quiz/home_screen.dart';
 import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
+import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,6 +13,7 @@ class ResultScreen extends StatefulWidget {
   final String correctAnswerType;
   final int score;
   final int maxScore;
+  final int failedQuestionIndex;
 
   const ResultScreen({
     super.key,
@@ -19,6 +21,7 @@ class ResultScreen extends StatefulWidget {
     required this.score,
     required this.correctAnswerType,
     required this.maxScore,
+    this.failedQuestionIndex = 0,
   });
   @override
   State<ResultScreen> createState() => _ResultScreenState();
@@ -26,10 +29,61 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   late final AudioPlayer _player;
+  final RewardedAdManager _adManager = RewardedAdManager();
+  bool _isAdReady = false;
+
+
+void _loadAd() {
+    _adManager.loadRewardedAd(
+      onAdLoaded: () {
+        setState(() {
+          _isAdReady = true;
+        });
+      },
+    );
+  }
+
+  void _watchAdForHealth() {
+    debugPrint('ทำงานแล้ว');
+    _adManager.showRewardedAd(
+      context: context,
+      // เมื่อดูโฆษณาจนจบ -> ได้รับรางวัล
+      onRewarded: () {
+        // setState(() {
+        //   _health = (_health + 25).clamp(0, _maxHealth); // เพิ่มเลือด 25
+        // });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('🎁 Pheonix !'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => QuizImgScreen(
+              initialIndex: widget.failedQuestionIndex, // เริ่มที่ข้อเดิม
+              initialScore: widget.score, // คะแนนเท่าเดิม
+            ),
+          ),
+        );
+      },
+      // เมื่อปิดโฆษณา (ไม่ว่าจะได้รับรางวัลหรือไม่)
+      onAdClosed: () {
+        setState(() {
+          _isAdReady = false;
+        });
+        debugPrint('Rewarded ad closed');
+      },
+    );
+  }
 
   @override
   void initState() {
     super.initState();
+    _loadAd();
     _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
     // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
   }
@@ -37,8 +91,11 @@ class _ResultScreenState extends State<ResultScreen> {
   @override
   void dispose() {
     _player.dispose();
+    _adManager.dispose();
     super.dispose();
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -210,6 +267,43 @@ class _ResultScreenState extends State<ResultScreen> {
                 ),
               ],
             ),
+              if (!isclear) 
+                 FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    side: const BorderSide(color: Colors.black, width: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                  ),
+                  child: Text(
+                    'RETRY ADS',
+                    style: GoogleFonts.luckiestGuy(
+                      fontSize: 25,
+                      fontWeight: FontWeight.w200,
+                      color: Colors.black,
+                      height: 1.1,
+                    ),
+                  ),
+                  onPressed: () {
+                    if (_isAdReady) {
+                      _watchAdForHealth(); // ✅ มีวงเล็บเพื่อสั่งทำงาน
+                    } else {
+                      debugPrint("ไม่จริง");
+                    }
+                  },
+                ),
+                
+              if (!_isAdReady)
+                const Text(
+                  'กำลังโหลดโฆษณา...',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
           ],
         ),
       ),

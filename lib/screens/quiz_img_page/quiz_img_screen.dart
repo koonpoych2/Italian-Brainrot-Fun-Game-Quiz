@@ -11,7 +11,14 @@ import 'package:brainrot_quiz/services/timer_service.dart';
 import 'package:flutter/material.dart';
 
 class QuizImgScreen extends StatefulWidget {
-  const QuizImgScreen({super.key});
+  final int initialIndex;
+  final int initialScore;
+
+  const QuizImgScreen({
+    super.key, 
+    this.initialIndex = 0, // ค่า default คือ 0 (เล่นใหม่)
+    this.initialScore = 0, // ค่า default คือ 0
+  });
 
   @override
   State<QuizImgScreen> createState() => _QuizImgScreenState();
@@ -22,12 +29,17 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   late final AudioPlayer _player;
   int? tempSelectAnswerIndex = null;
   int? selectAnswerIndex = null;
-  int score = 0;
-  int questionIndex = 0;
+
+  late int score;
+  late int questionIndex;
 
   @override
   void initState() {
     super.initState();
+
+    score = widget.initialScore;
+    questionIndex = widget.initialIndex;
+
     _player = AudioPlayer()..setReleaseMode(ReleaseMode.stop);
     _questionList = buildImgQuestions(optionsPerQuestion: 4);
     _startCountDown(); // เริ่มครั้งแรกที่หน้าเปิด ต่อให้เรียก setState() ก็จะไม่ทำฟังก์ชั่นนี้จะทำแค่ครั้งแรกที่ถูกสร้าางหน้านี้
@@ -58,6 +70,7 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
           score: score,
           maxScore: _questionList.length,
           correctAnswerType: answerType,
+          failedQuestionIndex: questionIndex,
         ),
       ),
     );

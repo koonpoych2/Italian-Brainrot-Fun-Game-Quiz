@@ -1,13 +1,69 @@
 import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'home_card.dart';
 import 'test_screen.dart';
 import 'sound_board_screen.dart';
 import 'wiki_list_screen.dart';
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      // 1. กำหนด Ad Unit ID (ตอนนี้ใช้ Test ID)
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      // 2. กำหนดขนาดโฆษณา
+      size: AdSize.banner,
+      // 3. ส่ง request ไปขอโฆษณาจาก Google
+      request: const AdRequest(),
+      // 4. Listener สำหรับฟังเหตุการณ์ต่างๆ
+      listener: BannerAdListener(
+
+        onAdLoaded: (ad) {
+          // เช็คว่า widget ยังคงอยู่ในหน้าจอหรือไม่
+          if (mounted) {
+            setState(() {
+              _isBannerAdLoaded = true;
+            });
+          }
+          debugPrint('✅ Banner ad loaded successfully');
+        },
+
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('❌ Banner ad failed to load: $error');
+          ad.dispose(); // ทำลาย ad object ที่โหลดไม่สำเร็จ
+          if (mounted) {
+            setState(() {
+              _isBannerAdLoaded = false;
+            });
+          }
+        },
+      ),
+    );
+
+    _bannerAd?.load(); // เริ่มโหลดโฆษณา
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose(); // ทำลาย ad object เพื่อประหยัด memory
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +77,6 @@ class HomeScreen extends StatelessWidget {
         ),
         elevation: 0,
       ),
-      
       body: Column(
         children: [
           Expanded(
@@ -32,15 +87,13 @@ class HomeScreen extends StatelessWidget {
                   MenuCard(
                     title: "QUIZ",
                     backgroundColor: Color(0xFF8B6FD8),
-                    // imagePath: 'assets/mammoth.png', // Replace with your image
-                    destination: QuizImgScreen(), // Your destination screen
+                    destination: QuizImgScreen(),
                     icon: Icons.lightbulb_outline,
                   ),
                   SizedBox(height: 50),
                   MenuCard(
                     title: "SOUND\nBOARD",
                     backgroundColor: Color(0xFF3FA89A),
-                    // imagePath: 'assets/robot.png', // Replace with your image
                     destination: SoundBoardScreen(),
                     icon: null,
                   ),
@@ -48,7 +101,6 @@ class HomeScreen extends StatelessWidget {
                   MenuCard(
                     title: "WIKI",
                     backgroundColor: Color(0xFFE9C46A),
-                    // imagePath: 'assets/monkey.png', // Replace with your image
                     destination: WikiListScreen(),
                     icon: Icons.language,
                   ),
@@ -56,20 +108,32 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            color: const Color(0xFF2B2B2B),
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: const Center(
-              child: Text(
-                'ADS',
-                style: TextStyle(
+          // Banner Ad Container
+          if (_isBannerAdLoaded && _bannerAd != null)
+            Container(
+              color: const Color(0xFF2B2B2B),
+              width: double.infinity,
+              height: 60,
+              child: Center(
+                child: SizedBox(
+                  width: _bannerAd!.size.width.toDouble(),  // ความกว้างของโฆษณา
+                  height: _bannerAd!.size.height.toDouble(), // ความสูงของโฆษณา
+                  child: AdWidget(ad: _bannerAd!), // Widget สำหรับแสดงโฆษณา
+                ),
+              ),
+            )
+          else
+            Container(
+              color: const Color(0xFF2B2B2B),
+              width: double.infinity,
+              height: 60,
+              child: const Center(
+                child: CircularProgressIndicator( // แสดงวงกลมหมุนขณะโหลด
                   color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  strokeWidth: 2,
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

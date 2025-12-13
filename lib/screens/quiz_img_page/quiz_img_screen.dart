@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:brainrot_quiz/components/ad_banner.dart';
 import 'package:brainrot_quiz/components/text_show.dart';
 import 'package:brainrot_quiz/constants.dart';
 import 'package:brainrot_quiz/models/quize.dart';
@@ -225,150 +226,140 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
         elevation: 0,
       ),
 
-      body: Padding(
-        padding: const EdgeInsets.only(top: kDefaultPaddin),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Expanded(
-              flex: 5,
-              child:
-                  ["sound-text", "sound-image"].contains(question.questionType)
-                  ? GestureDetector(
-                      onTap: () async {
-                        await _player.stop();
-                        await _player.play(AssetSource(question.question));
-                      },
-                      child: Align(
-                        child: Stack(
-                          alignment : Alignment.center,
-                          children: [
-                            Image.asset("assets/images/sound_disk.png"),
-                            CircleAvatar(
-                              radius: 40,
-                              backgroundColor: Colors.white,
-                              child: Icon(
-                                Icons.volume_up_rounded,
-                                color: Colors.black,
-                                size: 50,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Image.asset("assets/${question.question}"),
-                    ),
-            ),
-
-            Expanded(
-              flex: 5,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        const crossAxisCount = 2;
-                        const crossSpacing = 10.0;
-                        const mainSpacing = 10.0;
-
-                        // จำนวนแถวตามจำนวนตัวเลือก
-                        final rows = (question.options.length / crossAxisCount)
-                            .ceil();
-
-                        // คำนวณขนาดช่องให้พอดีกับพื้นที่
-                        final itemWidth =
-                            (constraints.maxWidth -
-                                (crossAxisCount - 1) * crossSpacing) /
-                            crossAxisCount;
-                        final itemHeight =
-                            (constraints.maxHeight - (rows - 1) * mainSpacing) /
-                            rows;
-
-                        final childAspectRatio = itemWidth / itemHeight;
-
-                        return GridView.builder(
-                          physics:
-                              const NeverScrollableScrollPhysics(), // ❗ ไม่ให้ scroll
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: crossAxisCount,
-                                crossAxisSpacing: crossSpacing,
-                                mainAxisSpacing: mainSpacing,
-                                childAspectRatio: childAspectRatio,
-                              ),
-                          itemCount: question.options.length,
-                          itemBuilder: (context, index) {
-                            return GestureDetector(
-                              onTap: () async {
-                                pickAnswer(index);
-                                if ([
-                                  "image-sound",
-                                ].contains(question.questionType)) {
-                                  await _player.stop();
-                                  await _player.play(
-                                    AssetSource(question.options[index]),
-                                  );
-                                }
-                              },
-                              child: Answercard(
-                                questionOption: question.options[index],
-                                questionOptionType: question.questionType,
-                                isSelected: selectAnswerIndex != null,
-                                currentAnswerIndex: index,
-                                selectAnswerIndex: tempSelectAnswerIndex,
-                                correctAnswerIndex: question.correctAnswerIndex,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: SizedBox(
-                      width: double.infinity, 
-                      child: FilledButton(
-                        onPressed: () {
-                          submitAnswer();
+      body: SafeArea(
+        bottom: true,
+        child: Padding(
+          padding: const EdgeInsets.only(top: kDefaultPaddin, bottom: 10,),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Expanded(
+                flex: 4,
+                child:
+                    ["sound-text", "sound-image"].contains(question.questionType)
+                    ? GestureDetector(
+                        onTap: () async {
+                          await _player.stop();
+                          await _player.play(AssetSource(question.question));
                         },
-                        child: TextShow(
-                          title: 'OK',
-                          backgroundColor: Colors.black,
-                          mainTextSize: 20,
-                          mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                        child: Align(
+                          child: Stack(
+                            alignment : Alignment.center,
+                            children: [
+                              Image.asset("assets/images/sound_disk.png"),
+                              CircleAvatar(
+                                radius: 40,
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.volume_up_rounded,
+                                  color: Colors.black,
+                                  size: 50,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Image.asset("assets/${question.question}"),
+                      ),
+              ),
+        
+              Expanded(
+                flex: 5,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          const crossAxisCount = 2;
+                          const crossSpacing = 10.0;
+                          const mainSpacing = 10.0;
+        
+                          // จำนวนแถวตามจำนวนตัวเลือก
+                          final rows = (question.options.length / crossAxisCount)
+                              .ceil();
+        
+                          // คำนวณขนาดช่องให้พอดีกับพื้นที่
+                          final itemWidth =
+                              (constraints.maxWidth -
+                                  (crossAxisCount - 1) * crossSpacing) /
+                              crossAxisCount;
+                          final itemHeight =
+                              (constraints.maxHeight - (rows - 1) * mainSpacing) /
+                              rows;
+        
+                          final childAspectRatio = itemWidth / itemHeight;
+        
+                          return GridView.builder(
+                            physics:
+                                const NeverScrollableScrollPhysics(), // ❗ ไม่ให้ scroll
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: crossSpacing,
+                                  mainAxisSpacing: mainSpacing,
+                                  childAspectRatio: childAspectRatio,
+                                ),
+                            itemCount: question.options.length,
+                            itemBuilder: (context, index) {
+                              return GestureDetector(
+                                onTap: () async {
+                                  pickAnswer(index);
+                                  if ([
+                                    "image-sound",
+                                  ].contains(question.questionType)) {
+                                    await _player.stop();
+                                    await _player.play(
+                                      AssetSource(question.options[index]),
+                                    );
+                                  }
+                                },
+                                child: Answercard(
+                                  questionOption: question.options[index],
+                                  questionOptionType: question.questionType,
+                                  isSelected: selectAnswerIndex != null,
+                                  currentAnswerIndex: index,
+                                  selectAnswerIndex: tempSelectAnswerIndex,
+                                  correctAnswerIndex: question.correctAnswerIndex,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ),
+        
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: SizedBox(
+                        width: double.infinity, 
+                        child: FilledButton(
+                          onPressed: () {
+                            submitAnswer();
+                          },
+                          child: TextShow(
+                            title: 'OK',
+                            backgroundColor: Colors.black,
+                            mainTextSize: 20,
+                            mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              color: const Color(0xFF2B2B2B),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: const Center(
-                child: Text(
-                  'ADS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 }

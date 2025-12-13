@@ -1,10 +1,10 @@
+import 'package:brainrot_quiz/components/ad_banner.dart';
 import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state_provider.dart';
 import 'data/app_data.dart';
-import 'widgets/ads_banner.dart';
 import 'widgets/custom_header.dart';
 import 'wiki_detail_screen.dart';
 class WikiListScreen extends StatefulWidget {
@@ -233,10 +233,10 @@ void _loadAd() {
                 },
               ),
             ),
-            const AdsBanner(),
           ],
         ),
       ),
+      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 }

@@ -1,6 +1,6 @@
+import 'package:brainrot_quiz/components/ad_banner.dart';
 import 'package:flutter/material.dart';
 import '../models/options.dart';
-import '../widgets/ads_banner.dart';
 import '../widgets/custom_header.dart';
 
 class WikiDetailScreen extends StatelessWidget {
@@ -91,10 +91,10 @@ class WikiDetailScreen extends StatelessWidget {
             ),
 
             // Ads
-            const AdsBanner(),
           ],
         ),
       ),
+      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 }

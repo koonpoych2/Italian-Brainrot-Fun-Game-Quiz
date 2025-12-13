@@ -1,3 +1,4 @@
+import 'package:brainrot_quiz/components/ad_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -266,25 +267,10 @@ void _loadAd() {
               ),
             ),
 
-            // Bottom bar
-            Container(
-              color: const Color(0xFF2B2B2B),
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: const Center(
-                child: Text(
-                  'ADS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
+      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 }

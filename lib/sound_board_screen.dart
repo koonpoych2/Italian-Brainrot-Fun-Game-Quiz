@@ -125,7 +125,7 @@ void _loadAd() {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'กำลังโหลดโฆษณา...',
+                          'loading ads...',
                           style: TextStyle(fontSize: 14),
                         ),
                       ],

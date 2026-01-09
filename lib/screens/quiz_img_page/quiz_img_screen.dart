@@ -10,6 +10,15 @@ import 'package:brainrot_quiz/screens/quiz_img_page/components/answerCard.dart';
 import 'package:brainrot_quiz/screens/result_page/result_screen.dart';
 import 'package:brainrot_quiz/services/timer_service.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+// Card colors matching home page style
+const List<Color> _cardColors = [
+  Color(0xFF9B59B6), // Purple
+  Color(0xFF1ABC9C), // Teal
+  Color(0xFFF1C40F), // Yellow
+  Color(0xFFE74C3C), // Red
+];
 
 class QuizImgScreen extends StatefulWidget {
   final int initialIndex;
@@ -143,223 +152,416 @@ class _QuizImgScreenState extends State<QuizImgScreen> {
   Widget build(BuildContext context) {
     final question = _questionList[questionIndex];
     return Scaffold(
-      backgroundColor: const Color(0xFFFFA867),
+      extendBodyBehindAppBar: true,
 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2B2B2B),
-
-        title: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black, width: 3),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.5)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "${_seconds.toString()}",
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(width: 4),
-              const Text(
-                "s",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: _buildTimerWidget(),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: _buildProgressWidget(),
+          ),
+        ],
+      ),
+
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFFB347), // Warm orange
+              Color(0xFFFFA867), // Main orange
+              Color(0xFFFF8C42), // Deeper orange
             ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
+        child: SafeArea(
+          bottom: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              children: [
+                // Question Card
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.black, width: 3),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          "${questionIndex + 1}",
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          "/${_questionList.length}",
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.4),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(24),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        child: _buildQuestionContent(question),
+                      ),
+                    ),
                   ),
-                ],
-              ),
-            ),
-          ),
-        ],
-        elevation: 0,
-      ),
-
-      body: SafeArea(
-        bottom: true,
-        child: Padding(
-          padding: const EdgeInsets.only(top: kDefaultPaddin, bottom: 10,),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                flex: 4,
-                child:
-                    ["sound-text", "sound-image"].contains(question.questionType)
-                    ? GestureDetector(
-                        onTap: () async {
-                          await _player.stop();
-                          await _player.play(AssetSource(question.question));
-                        },
-                        child: Align(
-                          child: Stack(
-                            alignment : Alignment.center,
-                            children: [
-                              Image.asset("assets/images/sound_disk.png"),
-                              CircleAvatar(
-                                radius: 40,
-                                backgroundColor: Colors.white,
-                                child: Icon(
-                                  Icons.volume_up_rounded,
-                                  color: Colors.black,
-                                  size: 50,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      )
-                    : Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Image.asset("assets/${question.question}"),
-                      ),
-              ),
-        
-              Expanded(
-                flex: 5,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          const crossAxisCount = 2;
-                          const crossSpacing = 10.0;
-                          const mainSpacing = 10.0;
-        
-                          // จำนวนแถวตามจำนวนตัวเลือก
-                          final rows = (question.options.length / crossAxisCount)
-                              .ceil();
-        
-                          // คำนวณขนาดช่องให้พอดีกับพื้นที่
-                          final itemWidth =
-                              (constraints.maxWidth -
-                                  (crossAxisCount - 1) * crossSpacing) /
-                              crossAxisCount;
-                          final itemHeight =
-                              (constraints.maxHeight - (rows - 1) * mainSpacing) /
-                              rows;
-        
-                          final childAspectRatio = itemWidth / itemHeight;
-        
-                          return GridView.builder(
-                            physics:
-                                const NeverScrollableScrollPhysics(), // ❗ ไม่ให้ scroll
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  crossAxisSpacing: crossSpacing,
-                                  mainAxisSpacing: mainSpacing,
-                                  childAspectRatio: childAspectRatio,
-                                ),
-                            itemCount: question.options.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () async {
-                                  pickAnswer(index);
-                                  if ([
-                                    "image-sound",
-                                  ].contains(question.questionType)) {
-                                    await _player.stop();
-                                    await _player.play(
-                                      AssetSource(question.options[index]),
-                                    );
-                                  }
-                                },
-                                child: Answercard(
-                                  questionOption: question.options[index],
-                                  questionOptionType: question.questionType,
-                                  isSelected: selectAnswerIndex != null,
-                                  currentAnswerIndex: index,
-                                  selectAnswerIndex: tempSelectAnswerIndex,
-                                  correctAnswerIndex: question.correctAnswerIndex,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
-        
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: SizedBox(
-                        width: double.infinity, 
-                        child: FilledButton(
-                          onPressed: () {
-                            submitAnswer();
-                          },
-                          child: TextShow(
-                            title: 'OK',
-                            backgroundColor: Colors.black,
-                            mainTextSize: 20,
-                            mainbackgroundColor: Color.fromARGB(255, 255, 255, 255),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            ],
+
+                // Answer Options
+                Expanded(
+                  flex: 5,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            const crossAxisCount = 2;
+                            const crossSpacing = 12.0;
+                            const mainSpacing = 12.0;
+
+                            final rows = (question.options.length / crossAxisCount).ceil();
+                            final itemWidth = (constraints.maxWidth - (crossAxisCount - 1) * crossSpacing) / crossAxisCount;
+                            final itemHeight = (constraints.maxHeight - (rows - 1) * mainSpacing) / rows;
+                            final childAspectRatio = itemWidth / itemHeight;
+
+                            return GridView.builder(
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                crossAxisSpacing: crossSpacing,
+                                mainAxisSpacing: mainSpacing,
+                                childAspectRatio: childAspectRatio,
+                              ),
+                              itemCount: question.options.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () async {
+                                    pickAnswer(index);
+                                    setState(() {});
+                                    if (["image-sound"].contains(question.questionType)) {
+                                      await _player.stop();
+                                      await _player.play(AssetSource(question.options[index]));
+                                    }
+                                  },
+                                  child: _buildStyledAnswerCard(question, index),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Submit Button
+                      _buildSubmitButton(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
       bottomNavigationBar: const AdBannerWidget(),
+    );
+  }
+
+  Widget _buildTimerWidget() {
+    final isLowTime = _seconds <= 10;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.timer_outlined,
+            color: isLowTime ? const Color(0xFFE74C3C) : const Color(0xFF8B4513),
+            size: 22,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            "${_seconds}s",
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 20,
+              color: isLowTime ? const Color(0xFFE74C3C) : const Color(0xFF8B4513),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressWidget() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "${questionIndex + 1}",
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 18,
+              color: const Color(0xFF9B59B6),
+            ),
+          ),
+          Text(
+            " / ${_questionList.length}",
+            style: GoogleFonts.luckiestGuy(
+              fontSize: 16,
+              color: const Color(0xFF8B4513).withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuestionContent(Question question) {
+    if (["sound-text", "sound-image"].contains(question.questionType)) {
+      return GestureDetector(
+        onTap: () async {
+          await _player.stop();
+          await _player.play(AssetSource(question.question));
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withOpacity(0.3),
+                Colors.white.withOpacity(0.1),
+              ],
+            ),
+          ),
+          child: Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Image.asset(
+                  "assets/images/sound_disk.png",
+                  width: 150,
+                  height: 150,
+                ),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF9B59B6).withOpacity(0.4),
+                        blurRadius: 15,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: Image.asset(
+          "assets/${question.question}",
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStyledAnswerCard(Question question, int index) {
+    final isSelected = tempSelectAnswerIndex == index;
+    final cardColor = _cardColors[index % _cardColors.length];
+
+    // Create darker shade for gradient
+    final darkerColor = HSLColor.fromColor(cardColor)
+        .withLightness((HSLColor.fromColor(cardColor).lightness - 0.15).clamp(0.0, 1.0))
+        .toColor();
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [cardColor, darkerColor],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
+          width: isSelected ? 4 : 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: cardColor.withOpacity(isSelected ? 0.6 : 0.4),
+            blurRadius: isSelected ? 20 : 12,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Answer content (rendered first, at bottom)
+          Center(
+            child: Answercard(
+              questionOption: question.options[index],
+              questionOptionType: question.questionType,
+              isSelected: selectAnswerIndex != null,
+              currentAnswerIndex: index,
+              selectAnswerIndex: tempSelectAnswerIndex,
+              correctAnswerIndex: question.correctAnswerIndex,
+            ),
+          ),
+          // Selection indicator (rendered last, on top)
+          if (isSelected)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.check,
+                  color: cardColor,
+                  size: 16,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF9B59B6), Color(0xFF8E44AD)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF9B59B6).withOpacity(0.4),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: submitAnswer,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'SUBMIT',
+                  style: GoogleFonts.luckiestGuy(
+                    fontSize: 24,
+                    color: Colors.white,
+                    letterSpacing: 2,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.3),
+                        offset: const Offset(2, 2),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

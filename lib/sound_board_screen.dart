@@ -1,15 +1,15 @@
+import 'dart:ui';
+
 import 'package:brainrot_quiz/components/ad_banner.dart';
+import 'package:brainrot_quiz/models/options_data.dart';
+import 'package:brainrot_quiz/widgets/page_background.dart';
+import 'package:brainrot_quiz/widgets/custom_header.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 import 'providers/app_state_provider.dart';
-import 'widgets/outlined_title_text.dart';
 import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
-
-final images = ['assets/images/burbaloni_lulliloli.png'];
-
-final sounds = ['sounds/burbaloni_lulliloli.mp3'];
 
 class SoundBoardScreen extends StatefulWidget {
   const SoundBoardScreen({super.key});
@@ -20,11 +20,11 @@ class SoundBoardScreen extends StatefulWidget {
 
 class _SoundBoardScreenState extends State<SoundBoardScreen> {
   final AudioPlayer _player = AudioPlayer();
-  static const int _totalSounds = 20;
+  int get _totalSounds => italianBrainrotOptions.length;
   final RewardedAdManager _adManager = RewardedAdManager();
   bool _isAdReady = false;
   VoidCallback? _onAdReadyCallback;
-  
+
   Future<void> _playSound(String path) async {
     await _player.stop();
     await _player.play(AssetSource(path));
@@ -36,79 +36,91 @@ class _SoundBoardScreenState extends State<SoundBoardScreen> {
     _loadAd();
   }
 
-void _loadAd() {
+  void _loadAd() {
     _adManager.loadRewardedAd(
       onAdLoaded: () {
         setState(() {
           _isAdReady = true;
         });
-        // เรียก callback ถ้ามี (กรณี dialog เปิดอยู่)
         _onAdReadyCallback?.call();
       },
     );
   }
+
   void _showUnlockDialog(BuildContext context, int index) {
     final appState = context.read<AppStateProvider>();
-    
+
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (BuildContext dialogContext, StateSetter setDialogState) {
-            // ตั้ง callback ให้อัพเดท dialog state
             _onAdReadyCallback = () {
               if (dialogContext.mounted) {
-                setDialogState(() {
-                  // trigger rebuild
-                });
+                setDialogState(() {});
               }
             };
 
             return AlertDialog(
-              title: Text('Unlock Sound', style: GoogleFonts.luckiestGuy()),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Text(
+                'Unlock Sound',
+                style: GoogleFonts.luckiestGuy(color: const Color(0xFFE76F51)),
+              ),
               content: const Text(
-                'Watch a video ad to unlock this sound?\n\n(Video ads will be added by your friend)',
+                'Watch a video ad to unlock this sound?',
                 style: TextStyle(fontSize: 16),
               ),
               actions: [
                 TextButton(
                   onPressed: () {
-                    _onAdReadyCallback = null; // clear callback
+                    _onAdReadyCallback = null;
                     Navigator.pop(ctx);
                   },
-                  child: const Text('Cancel'),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ),
                 if (_isAdReady)
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9B59B6),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                     onPressed: () {
-                      _onAdReadyCallback = null; // clear callback
+                      _onAdReadyCallback = null;
+                      _adManager.showRewardedAd(
+                        context: context,
+                        onRewarded: () async {
+                          final success = await appState.unlockSound(index);
+                          Navigator.pop(ctx);
 
-                    _adManager.showRewardedAd(
-                      context: context,
-                      onRewarded: () async {
-                        final success = await appState.unlockSound(index);
-                        Navigator.pop(ctx);
-
-                        if (success && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Sound unlocked! (Video ad will play here)'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        }
-                        
-
-                      },
-                      onAdClosed: () {
-                        setState(() {
-                          _isAdReady = false;
-                        });
-                        _loadAd();
-                      },
-                    );
-
-
+                          if (success && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: const Text('Sound unlocked! 🎉'),
+                                backgroundColor: Colors.green[600],
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        onAdClosed: () {
+                          setState(() {
+                            _isAdReady = false;
+                          });
+                          _loadAd();
+                        },
+                      );
                     },
                     child: const Text('Watch Ad & Unlock'),
                   )
@@ -124,10 +136,7 @@ void _loadAd() {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                         SizedBox(width: 8),
-                        Text(
-                          'loading ads...',
-                          style: TextStyle(fontSize: 14),
-                        ),
+                        Text('Loading ads...', style: TextStyle(fontSize: 14)),
                       ],
                     ),
                   ),
@@ -137,7 +146,6 @@ void _loadAd() {
         );
       },
     ).then((_) {
-      // เมื่อปิด dialog แล้ว clear callback
       _onAdReadyCallback = null;
     });
   }
@@ -154,123 +162,196 @@ void _loadAd() {
     final appState = context.watch<AppStateProvider>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFA867),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const OutlinedTitleText(text: 'Sound \nBoard'),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () => Navigator.pop(context),
+      body: PageBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Header
+              CustomHeader(
+                title: 'Sound Board',
+                onHomeTap: () => Navigator.pop(context),
+              ),
+
+              // Scrollable sound grid
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  child: Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    alignment: WrapAlignment.center,
+                    children: List.generate(_totalSounds, (index) {
+                      final isUnlocked = appState.isSoundUnlocked(index);
+                      final option = italianBrainrotOptions[index];
+
+                      return GestureDetector(
+                        onTap: isUnlocked
+                            ? () => _playSound(option.soundPath)
+                            : () => _showUnlockDialog(context, index),
+                        child: _buildSoundCard(index, isUnlocked),
+                      );
+                    }),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: const AdBannerWidget(),
+    );
+  }
+
+  Widget _buildSoundCard(int index, bool isUnlocked) {
+    final option = italianBrainrotOptions[index];
+
+    // Create different colors for cards
+    final colors = [
+      const Color(0xFF9B59B6), // Purple
+      const Color(0xFF1ABC9C), // Teal
+      const Color(0xFFF1C40F), // Yellow
+      const Color(0xFFE74C3C), // Red
+      const Color(0xFF3498DB), // Blue
+    ];
+    final cardColor = colors[index % colors.length];
+    final lighterColor = Color.lerp(cardColor, Colors.white, 0.6)!;
+    final darkerColor = Color.lerp(cardColor, Colors.black, 0.3)!;
+
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: cardColor.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [lighterColor, Colors.white.withOpacity(0.9), darkerColor],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            stops: const [0.0, 0.3, 1.0],
+          ),
+        ),
+        padding: const EdgeInsets.all(3),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(17),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(17),
+            child: Stack(
+              children: [
+                // Background image - use the correct image for this index
+                Positioned.fill(
+                  child: Image.asset('assets/${option.imgPath}', fit: BoxFit.cover),
+                ),
+                // Blur effect and overlay for locked items
+                if (!isUnlocked) ...[
+                  // Blur effect
+                  Positioned.fill(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                       child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: const Icon(
-                          Icons.home,
-                          color: Colors.black,
+                        color: Colors.transparent,
+                      ),
+                    ),
+                  ),
+                  // Semi-transparent black overlay
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(17),
+                      ),
+                    ),
+                  ),
+                  // Lock icon and number
+                  Positioned.fill(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.lock_rounded,
+                          color: Colors.white.withOpacity(0.95),
                           size: 36,
                         ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '#${index + 1}',
+                          style: GoogleFonts.luckiestGuy(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Video ad indicator
+                  Positioned(
+                    right: 5,
+                    bottom: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: Colors.red[600],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.videocam_rounded,
+                        color: Colors.white,
+                        size: 14,
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            // Scrollable sound grid
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  alignment: WrapAlignment.center,
-                  children: List.generate(_totalSounds, (index) {
-                    final isUnlocked = appState.isSoundUnlocked(index);
-
-                    return GestureDetector(
-                      onTap: isUnlocked
-                          ? () => _playSound(sounds[0])
-                          : () => _showUnlockDialog(context, index),
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 110,
-                            height: 110,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(25),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(25),
-                              child: isUnlocked
-                                  ? Image.asset(images[0], fit: BoxFit.cover)
-                                  : Container(
-                                      color: Colors.black.withOpacity(0.8),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.lock,
-                                          color: Colors.white,
-                                          size: 50,
-                                        ),
-                                      ),
-                                    ),
-                            ),
+                // Play icon overlay for unlocked
+                if (isUnlocked)
+                  Positioned(
+                    right: 5,
+                    bottom: 5,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
                           ),
-                          // Show video ad icon on locked items
-                          if (!isUnlocked)
-                            Positioned(
-                              bottom: 5,
-                              right: 5,
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.red[700],
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.white,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.play_arrow,
-                                  color: Colors.white,
-                                  size: 16,
-                                ),
-                              ),
-                            ),
                         ],
                       ),
-                    );
-                  }),
-                ),
-              ),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-
-          ],
+          ),
         ),
       ),
-      bottomNavigationBar: const AdBannerWidget(),
     );
   }
 }

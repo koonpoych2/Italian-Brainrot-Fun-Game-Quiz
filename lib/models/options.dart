@@ -3,6 +3,7 @@ class Options {
   final String imgPath;
   final String soundPath;
   final String description;
+  final String conclusionAi;
   final bool isUnlocked;
 
   const Options({
@@ -10,6 +11,7 @@ class Options {
     required this.imgPath,
     this.soundPath = '',
     this.description = 'default',
+    this.conclusionAi = '',
     this.isUnlocked = false
   });
 }

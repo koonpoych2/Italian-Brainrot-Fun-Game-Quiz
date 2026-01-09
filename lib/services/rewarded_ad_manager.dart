@@ -1,86 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../config/env/env_config.dart';
+import '../core/utils/app_logger.dart';
+
 class RewardedAdManager {
   RewardedAd? _rewardedAd;
   bool _isAdLoaded = false;
 
-  // โหลดโฆษณา
+  /// Get the rewarded ad unit ID from environment configuration
+  String get _adUnitId {
+    if (AppConfig.isInitialized) {
+      return AppConfig.instance.adRewardedUnitId;
+    }
+    // Fallback to test ad unit ID
+    return 'ca-app-pub-3940256099942544/5224354917';
+  }
+
+  /// Load a rewarded ad
   void loadRewardedAd({required VoidCallback onAdLoaded}) {
     RewardedAd.load(
-      // Test Rewarded Ad Unit ID
-      adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      adUnitId: _adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
-        // เมื่อโหลดสำเร็จ
         onAdLoaded: (ad) {
-          debugPrint('✅ Rewarded ad loaded successfully');
+          AppLogger.info('Rewarded ad loaded successfully', tag: 'Ads');
           _rewardedAd = ad;
           _isAdLoaded = true;
-          onAdLoaded(); // เรียก callback เมื่อโหลดเสร็จ
+          onAdLoaded();
         },
-        // เมื่อโหลดไม่สำเร็จ
         onAdFailedToLoad: (error) {
-          debugPrint('❌ Rewarded ad failed to load: $error');
+          AppLogger.error(
+            'Rewarded ad failed to load: ${error.message}',
+            tag: 'Ads',
+            error: error,
+          );
           _isAdLoaded = false;
         },
       ),
     );
   }
 
-  // แสดงโฆษณาและรับรางวัล
+  /// Show the rewarded ad and handle callbacks
   void showRewardedAd({
     required BuildContext context,
-    required VoidCallback onRewarded, // เมื่อได้รับรางวัล
-    required VoidCallback onAdClosed, // เมื่อปิดโฆษณา
+    required VoidCallback onRewarded,
+    required VoidCallback onAdClosed,
   }) {
     if (_rewardedAd == null || !_isAdLoaded) {
-      debugPrint('⚠️ Rewarded ad is not ready yet');
+      AppLogger.warning('Rewarded ad is not ready yet', tag: 'Ads');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('โฆษณายังไม่พร้อม กรุณารอสักครู่')),
       );
       return;
     }
 
-    // ตั้งค่า callback
     _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-      // เมื่อโฆษณาแสดงเต็มจอ
       onAdShowedFullScreenContent: (ad) {
-        debugPrint('📺 Rewarded ad showed full screen');
+        AppLogger.info('Rewarded ad showed full screen', tag: 'Ads');
       },
-      // เมื่อโฆษณาถูกปิด
       onAdDismissedFullScreenContent: (ad) {
-        debugPrint('❌ Rewarded ad dismissed');
+        AppLogger.info('Rewarded ad dismissed', tag: 'Ads');
         ad.dispose();
         _isAdLoaded = false;
-        onAdClosed(); // เรียก callback เมื่อปิดโฆษณา
-        // โหลดโฆษณาใหม่สำหรับครั้งต่อไป
+        onAdClosed();
+        // Preload the next ad
         loadRewardedAd(onAdLoaded: () {});
       },
-      // เมื่อเกิด error
       onAdFailedToShowFullScreenContent: (ad, error) {
-        debugPrint('⚠️ Rewarded ad failed to show: $error');
+        AppLogger.error(
+          'Rewarded ad failed to show: ${error.message}',
+          tag: 'Ads',
+          error: error,
+        );
         ad.dispose();
         _isAdLoaded = false;
         onAdClosed();
       },
     );
 
-    // แสดงโฆษณา
     _rewardedAd!.show(
       onUserEarnedReward: (ad, reward) {
-        // ผู้ใช้ดูโฆษณาจนจบแล้ว ได้รับรางวัล!
-        debugPrint('🎁 User earned reward: ${reward.amount} ${reward.type}');
-        onRewarded(); // เรียก callback เมื่อได้รับรางวัล
+        AppLogger.info(
+          'User earned reward: ${reward.amount} ${reward.type}',
+          tag: 'Ads',
+        );
+        onRewarded();
       },
     );
   }
 
-  // ทำลาย ad object
+  /// Dispose the ad object
   void dispose() {
     _rewardedAd?.dispose();
+    _rewardedAd = null;
+    _isAdLoaded = false;
   }
 
-  // เช็คว่าโฆษณาพร้อมหรือยัง
+  /// Check if the ad is ready to show
   bool get isAdReady => _isAdLoaded && _rewardedAd != null;
 }

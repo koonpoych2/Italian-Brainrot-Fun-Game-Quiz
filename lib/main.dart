@@ -1,17 +1,36 @@
-import 'package:brainrot_quiz/providers/app_state_provider.dart';
-import 'package:brainrot_quiz/services/storage_service.dart';
-import 'package:brainrot_quiz/screens/splash_screen/splash_screen.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'home_screen.dart';
+
+import 'config/env/dev_config.dart';
+import 'config/env/env_config.dart';
+import 'core/utils/app_logger.dart';
+import 'providers/app_state_provider.dart';
+import 'services/storage_service.dart';
+import 'screens/splash_screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize environment configuration (defaults to dev)
+  // For production, use main_prod.dart entry point
+  // For staging, use main_staging.dart entry point
+  if (!AppConfig.isInitialized) {
+    AppConfig.init(DevConfig());
+  }
+
+  // Initialize logger based on environment
+  AppLogger.init();
+  AppLogger.info(
+    'Starting app in ${AppConfig.instance.environment.name.toUpperCase()} mode',
+  );
+
   // Initialize storage service
   await StorageService().init();
-  await MobileAds.instance.initialize(); // เพิ่ม await
+
+  // Initialize Mobile Ads
+  await MobileAds.instance.initialize();
+
   runApp(const MyApp());
 }
 
@@ -20,6 +39,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final config = AppConfig.instance;
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
@@ -27,24 +48,11 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
-        title: 'Quiz',
+        title: config.appName,
+        debugShowCheckedModeBanner: config.showDebugBanner,
         theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // TRY THIS: Try running your application with "flutter run". You'll see
-          // the application has a purple toolbar. Then, without quitting the app,
-          // try changing the seedColor in the colorScheme below to Colors.green
-          // and then invoke "hot reload" (save your changes or press the "hot
-          // reload" button in a Flutter-sfupported IDE, or press "r" if you used
-          // the command line to start the app).
-          //
-          // Notice that the counter didn't reset back to zero; the application
-          // state is not lost during the reload. To reset the state, use hot
-          // restart instead.
-          //
-          // This works for code too, not just values: Most code changes can be
-          // tested with just a hot reload.
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
         ),
         home: const SplashScreen(),
       ),

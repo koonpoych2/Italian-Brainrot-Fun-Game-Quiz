@@ -2,6 +2,8 @@
 
 A fun and engaging Flutter quiz application with persistent storage, coins economy, and unlockable content!
 
+> **Production Ready** - This project follows clean architecture principles with environment-specific configurations for dev, staging, and production builds.
+
 ## ✨ Features
 
 ### 🎮 Quiz System
@@ -111,20 +113,69 @@ flutter run
 
 ```
 lib/
-├── components/          # Reusable UI components
-├── data/               # Static app data
-├── models/             # Data models
-├── providers/          # State management
-│   └── app_state_provider.dart
-├── screens/            # App screens
-│   ├── quiz_img_page/
-│   ├── result_page/
-│   └── debug_screen.dart
-├── services/           # Business logic
-│   ├── storage_service.dart
-│   └── timer_service.dart
-├── widgets/            # Custom widgets
-└── main.dart           # App entry point
+├── config/                    # Configuration files
+│   ├── env/                   # Environment configurations
+│   │   ├── env_config.dart    # Base config interface
+│   │   ├── dev_config.dart    # Development settings
+│   │   ├── staging_config.dart # Staging settings
+│   │   └── prod_config.dart   # Production settings
+│   ├── routes/                # App routing
+│   │   └── app_routes.dart
+│   └── themes/                # Theme configuration
+│       └── app_theme.dart
+├── core/                      # Core utilities
+│   ├── constants/             # App-wide constants
+│   │   └── app_constants.dart
+│   ├── errors/                # Error handling
+│   │   └── app_exceptions.dart
+│   ├── network/               # Network utilities
+│   └── utils/                 # Utility classes
+│       └── app_logger.dart
+├── data/                      # Data layer
+│   ├── datasources/           # Data sources
+│   ├── models/                # Data models
+│   └── repositories/          # Repository implementations
+├── domain/                    # Domain layer
+│   ├── entities/              # Business entities
+│   ├── repositories/          # Repository interfaces
+│   └── usecases/              # Use cases
+├── presentation/              # Presentation layer
+│   ├── providers/             # State management
+│   ├── pages/                 # Screen pages
+│   └── widgets/               # Reusable widgets
+├── components/                # Legacy UI components
+├── models/                    # Legacy data models
+├── providers/                 # Legacy providers
+├── screens/                   # Legacy screens
+├── services/                  # Business logic services
+├── widgets/                   # Legacy widgets
+├── main.dart                  # Default entry point (dev)
+├── main_dev.dart              # Development entry point
+├── main_staging.dart          # Staging entry point
+└── main_prod.dart             # Production entry point
+```
+
+## 🔧 Environment Configuration
+
+The app supports three environments:
+
+| Environment | Entry Point | Debug Banner | Logging | Test Ads |
+|-------------|-------------|--------------|---------|----------|
+| Development | `main_dev.dart` | ✅ Yes | ✅ Yes | ✅ Yes |
+| Staging | `main_staging.dart` | ✅ Yes | ✅ Yes | ✅ Yes |
+| Production | `main_prod.dart` | ❌ No | ❌ No | ❌ No |
+
+### Running Different Environments
+
+```bash
+# Development (default)
+flutter run
+
+# Staging
+flutter run -t lib/main_staging.dart
+
+# Production
+flutter run -t lib/main_prod.dart
 ```
 
 ## 📦 Dependencies
@@ -137,8 +188,34 @@ dependencies:
   audioplayers: ^6.5.1
   flutter_svg: ^2.2.2
   google_fonts: ^6.3.2
+  google_mobile_ads: ^5.2.0
   provider: ^6.1.2
   shared_preferences: ^2.2.3
+```
+
+## 🏗️ Build Commands
+
+### Development Build
+```bash
+flutter build apk -t lib/main_dev.dart --debug
+```
+
+### Staging Build
+```bash
+flutter build apk -t lib/main_staging.dart --release
+```
+
+### Production Build (Obfuscated)
+```bash
+flutter build appbundle -t lib/main_prod.dart --release --obfuscate --split-debug-info=build/debug-info
+```
+
+### Using Build Scripts (Windows)
+```bash
+# From project root
+scripts\build_dev.bat      # Development APK
+scripts\build_staging.bat  # Staging APK
+scripts\build_prod.bat     # Production App Bundle
 ```
 
 ## 🎯 Key Features Implementation
@@ -170,6 +247,8 @@ await appState.unlockWiki(3);
 - **[PERSISTENCE_GUIDE.md](PERSISTENCE_GUIDE.md)** - Detailed technical documentation
 - **[VIDEO_ADS_INTEGRATION_GUIDE.md](VIDEO_ADS_INTEGRATION_GUIDE.md)** - Guide for adding video ads
 - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Code snippets and patterns
+- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Pre-deployment checklist
+- **[scripts/build_commands.md](scripts/build_commands.md)** - Complete build commands reference
 
 ## 🧪 Testing
 
@@ -221,6 +300,19 @@ flutter test
 - Run `flutter clean`
 - Run `flutter pub get`
 - Check for syntax errors with `flutter analyze`
+
+## ✅ Production Checklist
+
+Before releasing to production:
+
+- [ ] Replace test AdMob IDs in `lib/config/env/prod_config.dart`
+- [ ] Update version in `pubspec.yaml`
+- [ ] Run `flutter analyze` - no errors
+- [ ] Run `flutter test` - all tests pass
+- [ ] Configure Android keystore signing
+- [ ] Configure iOS certificates and provisioning profiles
+- [ ] Test on real devices
+- [ ] Save `build/debug-info/` for crash reporting
 
 ## 🌟 Future Enhancements
 

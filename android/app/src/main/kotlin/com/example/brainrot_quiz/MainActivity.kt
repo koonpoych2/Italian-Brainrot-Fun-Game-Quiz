@@ -1,4 +1,4 @@
-package com.example.brainrot_quiz
+package com.example.all_in_one_brainrot
 
 import io.flutter.embedding.android.FlutterActivity
 

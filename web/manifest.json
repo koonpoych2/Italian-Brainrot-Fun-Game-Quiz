@@ -1,6 +1,6 @@
 {
-    "name": "brainrot_quiz",
-    "short_name": "brainrot_quiz",
+    "name": "all_in_one_brainrot",
+    "short_name": "all_in_one_brainrot",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

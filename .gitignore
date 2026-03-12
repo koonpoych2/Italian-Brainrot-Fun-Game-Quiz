@@ -62,4 +62,8 @@ linux/flutter/generated_plugins.cmake
 # Xcode specific (Flutter iOS)
 ios/Runner.xcworkspace/
 ios/Pods/
-ios/Podfile.lock
+
+# KeyStore
+key.properties
+*.jks
+

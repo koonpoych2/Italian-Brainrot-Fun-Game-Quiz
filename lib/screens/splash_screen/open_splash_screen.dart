@@ -13,7 +13,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  RewardedAd? _rewardedAd;
+  InterstitialAd? _interstitialAd;
   bool _isAdLoaded = false;
 
   late AnimationController _animationController;
@@ -42,35 +42,36 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _animationController.forward();
-    _loadRewardedAd();
+    _loadInterstitialAd();
   }
 
-  void _loadRewardedAd() {
-    RewardedAd.load(
-      adUnitId: 'ca-app-pub-4822776885970693/1862608860', // Test Rewarded Ad Unit ID
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: 'ca-app-pub-4822776885970693/3597334696',
       request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
+      adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
-          _rewardedAd = ad;
+          _interstitialAd = ad;
 
           setState(() {
             _isAdLoaded = true;
           });
 
-          _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
-            onAdShowedFullScreenContent: (ad) {},
-            onAdDismissedFullScreenContent: (ad) {
-              ad.dispose();
-              _navigateToHome();
-            },
-            onAdFailedToShowFullScreenContent: (ad, error) {
-              ad.dispose();
-              _navigateToHome();
-            },
-          );
+          _interstitialAd!.fullScreenContentCallback =
+              FullScreenContentCallback(
+                onAdShowedFullScreenContent: (ad) {},
+                onAdDismissedFullScreenContent: (ad) {
+                  ad.dispose();
+                  _navigateToHome();
+                },
+                onAdFailedToShowFullScreenContent: (ad, error) {
+                  ad.dispose();
+                  _navigateToHome();
+                },
+              );
 
           Future.delayed(const Duration(seconds: 2), () {
-            _showRewardedAd();
+            _showInterstitialAd();
           });
         },
         onAdFailedToLoad: (error) {
@@ -82,14 +83,9 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  void _showRewardedAd() {
-    if (_rewardedAd != null) {
-      _rewardedAd!.show(
-        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
-          // User earned reward
-          debugPrint('User earned reward: ${reward.amount} ${reward.type}');
-        },
-      );
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.show();
     } else {
       _navigateToHome();
     }
@@ -106,7 +102,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void dispose() {
     _animationController.dispose();
-    _rewardedAd?.dispose();
+    _interstitialAd?.dispose();
     super.dispose();
   }
 

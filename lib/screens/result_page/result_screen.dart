@@ -1,10 +1,10 @@
 import 'package:audioplayers/audioplayers.dart';
-import 'package:brainrot_quiz/components/ad_banner.dart';
-import 'package:brainrot_quiz/home_screen.dart';
-import 'package:brainrot_quiz/providers/app_state_provider.dart';
-import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
-import 'package:brainrot_quiz/services/rewarded_ad_manager.dart';
-import 'package:brainrot_quiz/widgets/page_background.dart';
+import 'package:all_in_one_brainrot/components/ad_banner.dart';
+import 'package:all_in_one_brainrot/home_screen.dart';
+import 'package:all_in_one_brainrot/providers/app_state_provider.dart';
+import 'package:all_in_one_brainrot/screens/quiz_img_page/quiz_img_screen.dart';
+import 'package:all_in_one_brainrot/services/rewarded_ad_manager.dart';
+import 'package:all_in_one_brainrot/widgets/page_background.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';

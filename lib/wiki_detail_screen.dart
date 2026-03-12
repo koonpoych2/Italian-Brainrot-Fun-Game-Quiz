@@ -1,6 +1,6 @@
-import 'package:brainrot_quiz/components/ad_banner.dart';
-import 'package:brainrot_quiz/widgets/page_background.dart';
-import 'package:brainrot_quiz/widgets/custom_header.dart';
+import 'package:all_in_one_brainrot/components/ad_banner.dart';
+import 'package:all_in_one_brainrot/widgets/page_background.dart';
+import 'package:all_in_one_brainrot/widgets/custom_header.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'models/options.dart';

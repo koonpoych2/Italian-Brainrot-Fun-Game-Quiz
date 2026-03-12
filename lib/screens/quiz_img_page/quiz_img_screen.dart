@@ -1,14 +1,14 @@
 import 'dart:ui';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:brainrot_quiz/components/ad_banner.dart';
-import 'package:brainrot_quiz/components/text_show.dart';
-import 'package:brainrot_quiz/constants.dart';
-import 'package:brainrot_quiz/models/quize.dart';
-import 'package:brainrot_quiz/models/quize_img_data.dart';
-import 'package:brainrot_quiz/screens/quiz_img_page/components/answerCard.dart';
-import 'package:brainrot_quiz/screens/result_page/result_screen.dart';
-import 'package:brainrot_quiz/services/timer_service.dart';
+import 'package:all_in_one_brainrot/components/ad_banner.dart';
+import 'package:all_in_one_brainrot/components/text_show.dart';
+import 'package:all_in_one_brainrot/constants.dart';
+import 'package:all_in_one_brainrot/models/quize.dart';
+import 'package:all_in_one_brainrot/models/quize_img_data.dart';
+import 'package:all_in_one_brainrot/screens/quiz_img_page/components/answerCard.dart';
+import 'package:all_in_one_brainrot/screens/result_page/result_screen.dart';
+import 'package:all_in_one_brainrot/services/timer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

@@ -1,4 +1,4 @@
-import 'package:brainrot_quiz/models/options.dart';
+import 'package:all_in_one_brainrot/models/options.dart';
 
 const List<Options> italianBrainrotOptions = [
   Options(

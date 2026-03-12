@@ -1,6 +1,6 @@
-import 'package:brainrot_quiz/models/options.dart';
-import 'package:brainrot_quiz/models/options_data.dart';
-import 'package:brainrot_quiz/models/quize.dart';
+import 'package:all_in_one_brainrot/models/options.dart';
+import 'package:all_in_one_brainrot/models/options_data.dart';
+import 'package:all_in_one_brainrot/models/quize.dart';
 import 'dart:math';
 
 

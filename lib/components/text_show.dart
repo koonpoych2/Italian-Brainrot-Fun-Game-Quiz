@@ -1,4 +1,4 @@
-import 'package:brainrot_quiz/screens/result_page/result_screen.dart';
+import 'package:all_in_one_brainrot/screens/result_page/result_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

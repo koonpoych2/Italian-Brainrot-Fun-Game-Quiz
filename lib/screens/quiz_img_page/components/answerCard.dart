@@ -1,5 +1,5 @@
-import 'package:brainrot_quiz/components/text_show.dart';
-import 'package:brainrot_quiz/constants.dart';
+import 'package:all_in_one_brainrot/components/text_show.dart';
+import 'package:all_in_one_brainrot/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

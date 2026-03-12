@@ -2,14 +2,14 @@
     <!-- ⚠️ เพิ่ม permissions เหล่านี้ก่อน <application> -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    
+
     <application
-        android:label="brainrot_quiz"
+        android:label="all_in_one_brainrot"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-4822776885970693~2827178506"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

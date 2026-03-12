@@ -1,5 +1,5 @@
-import 'package:brainrot_quiz/components/ad_banner.dart';
-import 'package:brainrot_quiz/screens/quiz_img_page/quiz_img_screen.dart';
+import 'package:all_in_one_brainrot/components/ad_banner.dart';
+import 'package:all_in_one_brainrot/screens/quiz_img_page/quiz_img_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'home_card.dart';

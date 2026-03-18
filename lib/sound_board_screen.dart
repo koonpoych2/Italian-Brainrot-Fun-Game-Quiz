@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:all_in_one_brainrot/components/ad_banner.dart';
-import 'package:all_in_one_brainrot/models/options_data.dart';
+import 'package:all_in_one_brainrot/data/sound_board_data.dart';
 import 'package:all_in_one_brainrot/widgets/page_background.dart';
 import 'package:all_in_one_brainrot/widgets/custom_header.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class SoundBoardScreen extends StatefulWidget {
 
 class _SoundBoardScreenState extends State<SoundBoardScreen> {
   final AudioPlayer _player = AudioPlayer();
-  int get _totalSounds => italianBrainrotOptions.length;
+  int get _totalSounds => SoundBoardData.totalItems;
   final RewardedAdManager _adManager = RewardedAdManager();
   bool _isAdReady = false;
   VoidCallback? _onAdReadyCallback;
@@ -185,11 +185,10 @@ class _SoundBoardScreenState extends State<SoundBoardScreen> {
                     alignment: WrapAlignment.center,
                     children: List.generate(_totalSounds, (index) {
                       final isUnlocked = appState.isSoundUnlocked(index);
-                      final option = italianBrainrotOptions[index];
 
                       return GestureDetector(
                         onTap: isUnlocked
-                            ? () => _playSound(option.soundPath)
+                            ? () => _playSound(SoundBoardData.sounds[index])
                             : () => _showUnlockDialog(context, index),
                         child: _buildSoundCard(index, isUnlocked),
                       );
@@ -206,8 +205,6 @@ class _SoundBoardScreenState extends State<SoundBoardScreen> {
   }
 
   Widget _buildSoundCard(int index, bool isUnlocked) {
-    final option = italianBrainrotOptions[index];
-
     // Create different colors for cards
     final colors = [
       const Color(0xFF9B59B6), // Purple
@@ -260,7 +257,7 @@ class _SoundBoardScreenState extends State<SoundBoardScreen> {
               children: [
                 // Background image - use the correct image for this index
                 Positioned.fill(
-                  child: Image.asset('assets/${option.imgPath}', fit: BoxFit.cover),
+                  child: Image.asset(SoundBoardData.images[index], fit: BoxFit.cover),
                 ),
                 // Blur effect and overlay for locked items
                 if (!isUnlocked) ...[

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'config/env/dev_config.dart';
 import 'config/env/env_config.dart';
+import 'config/env/prod_config.dart';
 import 'core/utils/app_logger.dart';
 import 'providers/app_state_provider.dart';
 import 'services/storage_service.dart';
@@ -12,11 +13,13 @@ import 'screens/splash_screen/splash_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize environment configuration (defaults to dev)
-  // For production, use main_prod.dart entry point
-  // For staging, use main_staging.dart entry point
+  // Initialize environment configuration
+  // - Development: use main_dev.dart entry point
+  // - Staging:     use main_staging.dart entry point
+  // - Production:  use main_prod.dart entry point  ← always use this for release builds!
   if (!AppConfig.isInitialized) {
-    AppConfig.init(DevConfig());
+    // Default to ProdConfig so accidental builds from main.dart are safe
+    AppConfig.init(ProdConfig());
   }
 
   // Initialize logger based on environment
